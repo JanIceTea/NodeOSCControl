@@ -1,0 +1,70 @@
+{
+"prototypes": {
+  "uiObjects": {
+    "image_01": {
+      "objectType": "image",
+      "url": "http://test.com/image.png"
+    },
+    "sendButton":{
+      "objectType": "button",
+      "states": {
+        "normal": {
+          "title": "Press me",
+          "textColor": "greenColor"
+        },
+        "highlighted": {
+          "title": "Highlight me",
+          "textColor": "redColor"
+        },
+        "selected": {
+          "title": "Selected",
+          "textColor": "blackColor"
+        }
+      },
+      "textColor": "blackColor",
+      "backgroundColor": "blueColor",
+      "size": {
+        "Width": 100,
+        "Height": 44
+      }
+    },
+    "sendSlider":{
+      "objectType": "UISlider",
+      "titles": {
+        "normal": "Press me",
+        "highlighted": "Press",
+        "selected": "Selected"
+      },
+      "backgroundColor": "ff9999"
+    },
+    "textLabel": {
+      "objectType": "label",
+      "backgroundColor": "greenColor"
+
+    }
+  },
+  "colors": {
+    "blueColor": {
+      "objectType": "color",
+      "floatValue": [0.1, 0.9, 0.1, 1.0]
+    },
+    "redColor": {
+      "objectType": "color",
+      "floatValue": [0.9, 0.1, 0.1, 1.0]
+    },
+    "greenColor": {
+      "objectType": "color",
+      "floatValue": [0.1, 0.6, 0.6, 1.0]
+    },
+    "blackColor": {
+      "objectType": "color",
+      "floatValue": [0.0, 0.0, 0.0, 1.0]
+    }
+  },
+  "images": {
+    "testName": {
+      "url": "http://192.168.2.9/image.png"
+    }
+  }
+}
+}
