@@ -1,12 +1,10 @@
-var hostName = "http://192.168.2.34";
-
 function setupUI(ctx, text){
 
     var width = ctx.canvas.width;
     var height = ctx.canvas.height;
 
     // overrides the default background color and pagebutton size
-    gui.backgroundColor = "rgb(0, 0, 0)";
+    gui.backgroundColor = "rgb(90, 90, 90)";
     gui.pageButtonSize = 150;
 
 /*
@@ -35,12 +33,35 @@ function setupUI(ctx, text){
 
 */
 
-
     // delete these and add your own buttons!!
-    gui.addElement(new PushButton()
-		    .position(10, height-200).size(width - 20,180)
-		    .color("rgb(61, 88, 151)")
-		    .oscAddress("/pushButton0").textColor("white")
-		    .label("Now").page(0));
+    gui.addElement(
+      new PushButton()
+        .position(10, 10)
+        .size(width - 20, 80)
+        .color("rgb(61, 88, 151)")
+		    .oscAddress("/pushButton0")
+        .textColor("white")
+		    .label("Now").page(0)
+      );
+
+      gui.addElement(
+        new TouchSlider()
+          .position(10, 100)
+          .size(width - 20, 80)
+          .color("rgb(61, 88, 151)")
+          .oscAddress("/touchSlider0")
+          .textColor("white")
+          .label("touchSlider0").page(0)
+        );
+
+        gui.addElement(
+          new TouchSlider()
+            .position(10, 200)
+            .size(width - 20, 80)
+            .color("rgb(61, 88, 151)")
+            .oscAddress("/touchSlider1")
+            .textColor("white")
+            .label("touchSlider1").page(0)
+          );
 
 }

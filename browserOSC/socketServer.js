@@ -1,18 +1,32 @@
+/*
+This is the entire server.
+Web server:
+The web server is a simple express app. Which responses to the root and some js and css resources.
+You can also register some commands which will be sent to the clients.
+The clients establish a permanent connection via a socket.
+
+Osc:
+The web server will patch all incoming data to the OSC client, which usually runs on the same machine and is thus the local host.
+The incoming data from the clients is handled by sockets.
+Each client get a unique id. (currently not handled in the osc).
+
+*/
+
+
 var expressApp = require('express')();
 var server = require('http').createServer(expressApp);
 var io = require('socket.io').listen(server);
-
 var osc = require('node-osc');
 
-// edit here
-var client = new osc.Client('192.168.2.8', 57120);
+// edit here your ip address which receives osc (mostly local host) and SC port
+var client = new osc.Client('127.0.0.1', 57120);
 
-server.listen(8080);	// webserver on port 80
+server.listen(8080);	// webserver on port 8080
 
 // uncomment this to add status messages about connections
 setInterval(status, 1000);
 
-function setupDefaultApp(app) {
+function setupDefaultWebServer(app) {
   app.get('/', function (req, res) {
     res.sendfile(__dirname + '/ui.html');
   });
@@ -57,7 +71,8 @@ function setupDefaultApp(app) {
     res.sendfile(__dirname + '/resources/ICON.png');
   });
 
-//nore specific
+//commands to the connected clients
+
   app.get('/ask', function (req, res) {
       for(i = 0; i < connectedSessions.length; i++){
           console.log("availableClients" + availableClients[i]);
@@ -81,6 +96,15 @@ function setupDefaultApp(app) {
     res.sendfile(__dirname + '/done.html');
   });
 
+  app.get('/screen_2', function (req, res) {
+    var items = ['Stand Up Now', 'Wave your phone in the air', 'Stand up and bow to your neighbour'];
+    for(i = 0; i < connectedSessions.length; i++){
+      var item = items[Math.floor(Math.random()*items.length)];
+      connectedSessions[i].emit('setText', item);
+    }
+    res.sendfile(__dirname + '/done.html');
+  });
+
   app.get('/showSplash', function (req, res) {
     for(i = 0; i < connectedSessions.length; i++){
       connectedSessions[i].emit('showSplash');
@@ -93,7 +117,9 @@ function setupDefaultApp(app) {
   });
 }
 
-setupDefaultApp(expressApp);
+setupDefaultWebServer(expressApp);
+
+//setup iO sockets:
 
 // this session managment code is for future features that will be included in RC1
 var connectedSessions = [];	// array of every connection
@@ -132,8 +158,6 @@ io.sockets.on('connection', function (socket) {
 
   });
 
-/////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
   socket.on("iAm", function(data){

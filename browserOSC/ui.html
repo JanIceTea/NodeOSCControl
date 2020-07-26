@@ -6,98 +6,98 @@
 <script src="setupUI.js"></script>
 
 <script>
-  // socket.io stuff
-  var hostName = "http://192.168.2.34";
-  var participantName;
+// socket.io stuff
+// this file needs some clean up
+// set here the server ip address
+var hostName = "http://192.168.2.34:8080";
+var participantName;
 
-  var socket = io.connect(hostName);
+var socket = io.connect(hostName);
 
- console.log("Connected!");
- console.log(socket);
+console.log("Connected!");
+console.log(socket);
 
-  socket.on("whoAreYou", function(data){
-    console.log("Got asked who I am.");
-    iAmEmit();
-  });
+socket.on("whoAreYou", function(data){
+  console.log("Got asked who I am.");
+  showCanvas();
+  iAmEmit();
+});
 
 socket.on("setText", function(data) {
-          drawCanvasWithText(data, false);
-        });
+  drawCanvasWithText(data, false);
+});
 
 socket.on("setTextWithButton", function(data) {
-          drawCanvasWithText(data, true);
-          });
+  drawCanvasWithText(data, true);
+});
 
 socket.on("hideCanvas", function(data) {
-          $("#myCanvas").hide();
-          $("#splash").hide();
-
-          });
+  hideCanvas();
+});
 
 socket.on("showCanvas", function(data) {
-        $("#myCanvas").show();
-          $("#splash").hide();
-          $("#farbstreifen").show();
-
-        });
+  showCanvas();
+});
 
 socket.on("showSplash", function(data) {
-          drawCanvasWithSplash();
-          });
+  drawCanvasWithSplash();
+});
 
-  function iAmEmit(){
-    participant = document.getElementById('participantName');
-    participantName = participant.value;
+function hideCanvas() {
+  $("#myCanvas").hide();
+  $("#splash").hide();
+}
 
-    var sessionType = {
-      type: "client",
-      location: participantName
-    };
+function showCanvas() {
+  $("#myCanvas").show();
+  $("#splash").hide();
+  $("#farbstreifen").show();
+}
 
-    console.log("Emitting iAm packet:");
-    console.log(sessionType);
-    socket.emit("iAm", sessionType);
-  }
+function iAmEmit() {
+  participant = document.getElementById('participantName');
+  participantName = participant.value;
+  var sessionType = {
+    type: "client",
+    location: participantName
+  };
+  console.log("Emitting iAm packet:");
+  console.log(sessionType);
+  socket.emit("iAm", sessionType);
+}
 
-  function listServers(){
-    socket.emit("listServers", {} );
-  }
+function listServers(){
+  socket.emit("listServers", {} );
+}
 
-  function oscSend(destinationAddress, v){
-    var oscPacket = {};
-    oscPacket.destinationAddress = destinationAddress;
-    oscPacket.v = v;
-
-    socket.emit("sendOSC", oscPacket );
-  }
+function oscSend(destinationAddress, v){
+  var oscPacket = {};
+  oscPacket.destinationAddress = destinationAddress;
+  oscPacket.v = v;
+  socket.emit("sendOSC", oscPacket );
+}
 
 // http: //www.html5canvastutorials.com/tutorials/html5-canvas-wrap-text-tutorial/
 function wrapText(context, text, x, y, maxWidth, lineHeight) {
-    var cars = text.split("\n");
-
-    for (var ii = 0; ii < cars.length; ii++) {
-
-        var line = "";
-        var words = cars[ii].split(" ");
-
-        for (var n = 0; n < words.length; n++) {
-            var testLine = line + words[n] + " ";
-            var metrics = context.measureText(testLine);
-            var testWidth = metrics.width;
-
-            if (testWidth > maxWidth) {
-                context.fillText(line, x, y);
-                line = words[n] + " ";
-                y += lineHeight;
-            }
-            else {
-                line = testLine;
-            }
-        }
-
+  var cars = text.split("\n");
+  for (var ii = 0; ii < cars.length; ii++) {
+    var line = "";
+    var words = cars[ii].split(" ");
+    for (var n = 0; n < words.length; n++) {
+      var testLine = line + words[n] + " ";
+      var metrics = context.measureText(testLine);
+      var testWidth = metrics.width;
+      if (testWidth > maxWidth) {
         context.fillText(line, x, y);
+        line = words[n] + " ";
         y += lineHeight;
+      } else {
+        line = testLine;
+      }
     }
+    context.fillText(line, x, y);
+    y += lineHeight;
+  }
 }
 
 function drawCanvasWithSplash(){
@@ -107,7 +107,6 @@ function drawCanvasWithSplash(){
         ctx.drawImage(imageObj, (ctx.canvas.width - imageObj.width) / 2, (ctx.canvas.height - imageObj.height) / 2);
     };
     imageObj.src = 'Default-568h.png';
-
 }
 
 function drawCanvasWithText(text, showButton) {
@@ -119,9 +118,7 @@ function drawCanvasWithText(text, showButton) {
     };
     imageObj.src = 'Farbstreifen.png';
 
-
-    if(showButton)
-    {
+    if(showButton) {
         gui.DrawElements(ctx);
     }
 
@@ -164,7 +161,7 @@ function drawCanvasWithText(text, showButton) {
     var canvasWidth = 180;
 
     ctx.canvas.width  = $(container).width();
-    ctx.canvas.height = $(container).height();
+    ctx.canvas.height = 500; //$(container).height();
     ctx.lineJoin ="round";
 
     xoffset = ($(container).width() - canvasWidth) / 2;
@@ -185,7 +182,7 @@ function drawCanvasWithText(text, showButton) {
 
     setupUI(ctx, "Hello");
 //    drawCanvasWithSplash();
-    drawCanvasWithText("Test", false);
+    // drawCanvasWithText("Test", false);
     // ranges of the DeviceOrientation data
     var rangeLR = Object();
     rangeLR.min = -30;
@@ -200,10 +197,6 @@ function drawCanvasWithText(text, showButton) {
     rangeCompass.max = 360.0;
 
     $(document).ready(function() {
-      $("#clientData").hide();
-//      $("#myCanvas").hide();
-      $("#farbstreifen").hide();
-
 
       var el = document.getElementsByTagName("canvas")[0];
       el.addEventListener("touchstart", handleStart, false);
@@ -215,8 +208,6 @@ function drawCanvasWithText(text, showButton) {
       el.addEventListener("mousemove", handleMove, false);
       el.addEventListener("mouseup", handleEnd, false);
 
-
-
 function handleStart(evt) {
 	mouseDownFlag = true;
 
@@ -225,16 +216,12 @@ function handleStart(evt) {
 	var ctx = el.getContext("2d");
 	var touches = [];
 	if(evt.changedTouches === undefined){
-
 	  touches[0] = {
 	    pageX: evt.pageX - el.offsetLeft,
 	    pageY: evt.pageY - el.offsetTop
 	  }
-
-                      console.log(touches[0].pageX);
-
-	}
-	else {
+    console.log(touches[0].pageX);
+	} else {
 	  touches = evt.changedTouches;
 	}
 
@@ -278,20 +265,18 @@ function handleEnd(evt) {
 	var touches = [];
 	if(evt.changedTouches === undefined){
 	  touches[0] = {
-                      pageX: evt.pageX - el.offsetLeft,
-                      pageY: evt.pageY - el.offsetTop
+      pageX: evt.pageX - el.offsetLeft,
+      pageY: evt.pageY - el.offsetTop
 	  }
-	}
-	else {
+	} else {
 	  touches = evt.changedTouches;
 	}
 
 	gui.CheckBounds("end", touches);
 	gui.Tick(ctx);
+}
 
-      }
-
-    });	// end of $(document).ready
+});	// end of $(document).ready
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -301,74 +286,60 @@ function handleEnd(evt) {
       // document.getElementById("doEvent").innerHTML = "DeviceOrientation";
       // Listen for the deviceorientation event and handle the raw data
       window.addEventListener('deviceorientation', function(eventData) {
-	// gamma is the left-to-right tilt in degrees, where right is positive
-	var tiltLR = eventData.gamma;
-
-	// beta is the front-to-back tilt in degrees, where front is positive
-	var tiltFB = eventData.beta;
-
-	// alpha is the compass direction the device is facing in degrees
-	var dir = eventData.alpha
-
-	// deviceorientation does not provide this data
-	var motUD = null;
-
-	// call our orientation event handler
-	deviceOrientationHandler(tiltLR, tiltFB, dir, motUD);
+        // gamma is the left-to-right tilt in degrees, where right is positive
+        var tiltLR = eventData.gamma;
+        // beta is the front-to-back tilt in degrees, where front is positive
+        var tiltFB = eventData.beta;
+        // alpha is the compass direction the device is facing in degrees
+        var dir = eventData.alpha
+        // deviceorientation does not provide this data
+        var motUD = null;
+        // call our orientation event handler
+        deviceOrientationHandler(tiltLR, tiltFB, dir, motUD);
       }, false);
-    }
-    else if (window.OrientationEvent) {
+    } else if (window.OrientationEvent) {
       // document.getElementById("doEvent").innerHTML = "MozOrientation";
       window.addEventListener('MozOrientation', function(eventData) {
-	// x is the left-to-right tilt from -1 to +1, so we need to convert to degrees
-	var tiltLR = eventData.x * 90;
-
-	// y is the front-to-back tilt from -1 to +1, so we need to convert to degrees
-	// We also need to invert the value so tilting the device towards us (forward)
-	// results in a positive value.
-	var tiltFB = eventData.y * -90;
-
-	// MozOrientation does not provide this data
-	var dir = null;
-
-	// z is the vertical acceleration of the device
-	var motUD = eventData.z;
-
-	// call our orientation event handler
-	deviceOrientationHandler(tiltLR, tiltFB, dir, motUD);
+        // x is the left-to-right tilt from -1 to +1, so we need to convert to degrees
+        var tiltLR = eventData.x * 90;
+        // y is the front-to-back tilt from -1 to +1, so we need to convert to degrees
+        // We also need to invert the value so tilting the device towards us (forward)
+        // results in a positive value.
+        var tiltFB = eventData.y * -90;
+        // MozOrientation does not provide this data
+        var dir = null;
+        // z is the vertical acceleration of the device
+        var motUD = eventData.z;
+        // call our orientation event handler
+        deviceOrientationHandler(tiltLR, tiltFB, dir, motUD);
       }, false);
-    }
-    else {
+    } else {
       // document.getElementById("doEvent").innerHTML = "Not supported on your device or browser."
     }
 
     function deviceOrientationHandler(tiltLR, tiltFB, dir, motUD){
-
       for(var i = 0; i < gui.elements.length; ++i){
-	if(gui.elements[i].elementType == "TiltSlider"){
-	  if(gui.elements[i].isActive){
-	    if(!gui.elements[i].isHorizontal){
-	      // forward / backwards tilt
-	      if(gui.currentPage != gui.elements[i]._page){
-		gui.elements[i].activate("tilt", false);
-	      }
-	      else {
-		gui.elements[i].activate("tilt", true);
-	      }
-	      gui.elements[i].currentValue = 1.0 - normalizeValue(tiltFB, rangeFB.min, rangeFB.max);
-	    }
-	    else {
-	      // left /right tilt
-	      if(gui.currentPage != gui.elements[i]._page){
-		gui.elements[i].activate("tilt", false);
-	      }
-	      else {
-		gui.elements[i].activate("tilt", true);
-	      }
-	      gui.elements[i].currentValue = normalizeValue(tiltLR, rangeLR.min, rangeLR.max);
-	    }
-	  }
-	}
+        if(gui.elements[i].elementType == "TiltSlider"){
+          if(gui.elements[i].isActive){
+            if(!gui.elements[i].isHorizontal){
+              // forward / backwards tilt
+              if(gui.currentPage != gui.elements[i]._page){
+                gui.elements[i].activate("tilt", false);
+              } else {
+                gui.elements[i].activate("tilt", true);
+              }
+              gui.elements[i].currentValue = 1.0 - normalizeValue(tiltFB, rangeFB.min, rangeFB.max);
+            } else {
+              // left /right tilt
+              if(gui.currentPage != gui.elements[i]._page){
+                gui.elements[i].activate("tilt", false);
+              } else {
+                gui.elements[i].activate("tilt", true);
+              }
+              gui.elements[i].currentValue = normalizeValue(tiltLR, rangeLR.min, rangeLR.max);
+            }
+          }
+        }
       }
 
       var el = document.getElementsByTagName("canvas")[0];
