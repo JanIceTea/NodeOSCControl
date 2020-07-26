@@ -1,4 +1,4 @@
-var hostName = "http://192.168.2.8";
+var hostName = "http://192.168.2.34";
 
 function setupUI(ctx, text){
 
@@ -35,7 +35,7 @@ function setupUI(ctx, text){
 
 */
 
-    
+
     // delete these and add your own buttons!!
     gui.addElement(new PushButton()
 		    .position(10, height-200).size(width - 20,180)

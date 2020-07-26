@@ -7,62 +7,63 @@
 
 <script>
   // socket.io stuff
+  var hostName = "http://192.168.2.34";
   var participantName;
 
   var socket = io.connect(hostName);
-  
-//  console.log("Connected!");
-//  console.log(socket);
+
+ console.log("Connected!");
+ console.log(socket);
 
   socket.on("whoAreYou", function(data){
     console.log("Got asked who I am.");
     iAmEmit();
   });
-  
+
 socket.on("setText", function(data) {
           drawCanvasWithText(data, false);
         });
-        
+
 socket.on("setTextWithButton", function(data) {
           drawCanvasWithText(data, true);
           });
-        
+
 socket.on("hideCanvas", function(data) {
           $("#myCanvas").hide();
           $("#splash").hide();
 
           });
-          
+
 socket.on("showCanvas", function(data) {
         $("#myCanvas").show();
           $("#splash").hide();
           $("#farbstreifen").show();
 
         });
-    
+
 socket.on("showSplash", function(data) {
           drawCanvasWithSplash();
           });
-        
+
   function iAmEmit(){
     participant = document.getElementById('participantName');
     participantName = participant.value;
-            
-    var sessionType = { 
+
+    var sessionType = {
       type: "client",
       location: participantName
-    };    
-    
+    };
+
     console.log("Emitting iAm packet:");
-    console.log(sessionType);    
-    socket.emit("iAm", sessionType);          
+    console.log(sessionType);
+    socket.emit("iAm", sessionType);
   }
-  
+
   function listServers(){
     socket.emit("listServers", {} );
   }
-  
-  function oscSend(destinationAddress, v){  
+
+  function oscSend(destinationAddress, v){
     var oscPacket = {};
     oscPacket.destinationAddress = destinationAddress;
     oscPacket.v = v;
@@ -73,17 +74,17 @@ socket.on("showSplash", function(data) {
 // http: //www.html5canvastutorials.com/tutorials/html5-canvas-wrap-text-tutorial/
 function wrapText(context, text, x, y, maxWidth, lineHeight) {
     var cars = text.split("\n");
-    
+
     for (var ii = 0; ii < cars.length; ii++) {
-        
+
         var line = "";
         var words = cars[ii].split(" ");
-        
+
         for (var n = 0; n < words.length; n++) {
             var testLine = line + words[n] + " ";
             var metrics = context.measureText(testLine);
             var testWidth = metrics.width;
-            
+
             if (testWidth > maxWidth) {
                 context.fillText(line, x, y);
                 line = words[n] + " ";
@@ -93,7 +94,7 @@ function wrapText(context, text, x, y, maxWidth, lineHeight) {
                 line = testLine;
             }
         }
-        
+
         context.fillText(line, x, y);
         y += lineHeight;
     }
@@ -123,11 +124,11 @@ function drawCanvasWithText(text, showButton) {
     {
         gui.DrawElements(ctx);
     }
-    
+
     ctx.font = '40pt Helvetica';
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
-    
+
     wrapText(ctx, text, ctx.canvas.width /2, 200, ctx.canvas.width, 80);
 
 }
@@ -144,7 +145,7 @@ function drawCanvasWithText(text, showButton) {
 <link rel="stylesheet" href="/layout.css" />
 </head>
 <body>
-  
+
   <div id="doEvent"></div>
   <div id="information"></div>
 
@@ -161,15 +162,15 @@ function drawCanvasWithText(text, showButton) {
     var container = $(c).parent();
     var xoffset = 0;
     var canvasWidth = 180;
-    
+
     ctx.canvas.width  = $(container).width();
     ctx.canvas.height = $(container).height();
     ctx.lineJoin ="round";
-    
+
     xoffset = ($(container).width() - canvasWidth) / 2;
-    
+
     //$(window).resize( respondCanvas );
-    
+
     function respondCanvas(){
         //c.attr('width', $(container).width()); //max width
         //c.attr('height', $(container).height()); //max height
@@ -178,26 +179,26 @@ function drawCanvasWithText(text, showButton) {
         //ctx.translate(xoffset, 0);
 
         //Call a function to redraw other content (texts, images etc)
-        //gui.DrawElements(ctx);        
+        //gui.DrawElements(ctx);
 
     }
-    
+
     setupUI(ctx, "Hello");
-    drawCanvasWithSplash();
-    //drawCanvasWithText("", false);
+//    drawCanvasWithSplash();
+    drawCanvasWithText("Test", false);
     // ranges of the DeviceOrientation data
     var rangeLR = Object();
     rangeLR.min = -30;
     rangeLR.max = 30;
-    
+
     var rangeFB = Object();
     rangeFB.min = -10;
     rangeFB.max = 70;
-    
+
     var rangeCompass = Object();
     rangeCompass.min = 0.0;
-    rangeCompass.max = 360.0;  
-        
+    rangeCompass.max = 360.0;
+
     $(document).ready(function() {
       $("#clientData").hide();
 //      $("#myCanvas").hide();
@@ -205,20 +206,20 @@ function drawCanvasWithText(text, showButton) {
 
 
       var el = document.getElementsByTagName("canvas")[0];
-      el.addEventListener("touchstart", handleStart, false);      
+      el.addEventListener("touchstart", handleStart, false);
       el.addEventListener("touchmove", handleMove, false);
       el.addEventListener("touchend", handleEnd, false);
-      
+
       // mouse events
       el.addEventListener("mousedown", handleStart, false);
       el.addEventListener("mousemove", handleMove, false);
       el.addEventListener("mouseup", handleEnd, false);
-            
 
-                      
+
+
 function handleStart(evt) {
 	mouseDownFlag = true;
-      
+
 	evt.preventDefault();
 	var el = document.getElementsByTagName("canvas")[0];
 	var ctx = el.getContext("2d");
@@ -229,23 +230,23 @@ function handleStart(evt) {
 	    pageX: evt.pageX - el.offsetLeft,
 	    pageY: evt.pageY - el.offsetTop
 	  }
-                      
+
                       console.log(touches[0].pageX);
 
 	}
 	else {
 	  touches = evt.changedTouches;
 	}
-	
+
 	gui.CheckBounds("start", touches);
-	gui.Tick(ctx);	
-      }        
-      
+	gui.Tick(ctx);
+      }
+
 function handleMove(evt) {
 	evt.preventDefault();
 	var el = document.getElementsByTagName("canvas")[0];
 	var ctx = el.getContext("2d");
-	
+
 	var touches = [];
 	if(evt.changedTouches === undefined){
 	  touches[0] = {
@@ -260,20 +261,20 @@ function handleMove(evt) {
 	else {
 	  touches = evt.changedTouches;
 	  gui.CheckBounds("move", touches);
-	  gui.Tick(ctx);	  
-	}	
-	
+	  gui.Tick(ctx);
+	}
+
 	if(debugMode){ oscSend("moveEvent",0) };
-		
-      }      
-      
-function handleEnd(evt) {      
+
+      }
+
+function handleEnd(evt) {
 	mouseDownFlag = false;
-      
+
 	evt.preventDefault();
 	var el = document.getElementsByTagName("canvas")[0];
 	var ctx = el.getContext("2d");
-	
+
 	var touches = [];
 	if(evt.changedTouches === undefined){
 	  touches[0] = {
@@ -283,15 +284,15 @@ function handleEnd(evt) {
 	}
 	else {
 	  touches = evt.changedTouches;
-	}	
-	
+	}
+
 	gui.CheckBounds("end", touches);
 	gui.Tick(ctx);
-	
-      }            
-      
+
+      }
+
     });	// end of $(document).ready
-    
+
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -315,7 +316,7 @@ function handleEnd(evt) {
 	// call our orientation event handler
 	deviceOrientationHandler(tiltLR, tiltFB, dir, motUD);
       }, false);
-    } 
+    }
     else if (window.OrientationEvent) {
       // document.getElementById("doEvent").innerHTML = "MozOrientation";
       window.addEventListener('MozOrientation', function(eventData) {
@@ -323,8 +324,8 @@ function handleEnd(evt) {
 	var tiltLR = eventData.x * 90;
 
 	// y is the front-to-back tilt from -1 to +1, so we need to convert to degrees
-	// We also need to invert the value so tilting the device towards us (forward) 
-	// results in a positive value. 
+	// We also need to invert the value so tilting the device towards us (forward)
+	// results in a positive value.
 	var tiltFB = eventData.y * -90;
 
 	// MozOrientation does not provide this data
@@ -332,69 +333,69 @@ function handleEnd(evt) {
 
 	// z is the vertical acceleration of the device
 	var motUD = eventData.z;
-	
+
 	// call our orientation event handler
 	deviceOrientationHandler(tiltLR, tiltFB, dir, motUD);
       }, false);
-    } 
+    }
     else {
       // document.getElementById("doEvent").innerHTML = "Not supported on your device or browser."
-    }      
-        
+    }
+
     function deviceOrientationHandler(tiltLR, tiltFB, dir, motUD){
-    
+
       for(var i = 0; i < gui.elements.length; ++i){
 	if(gui.elements[i].elementType == "TiltSlider"){
 	  if(gui.elements[i].isActive){
-	    if(!gui.elements[i].isHorizontal){	      
+	    if(!gui.elements[i].isHorizontal){
 	      // forward / backwards tilt
 	      if(gui.currentPage != gui.elements[i]._page){
 		gui.elements[i].activate("tilt", false);
 	      }
 	      else {
 		gui.elements[i].activate("tilt", true);
-	      }	      
+	      }
 	      gui.elements[i].currentValue = 1.0 - normalizeValue(tiltFB, rangeFB.min, rangeFB.max);
 	    }
-	    else {	      
+	    else {
 	      // left /right tilt
 	      if(gui.currentPage != gui.elements[i]._page){
 		gui.elements[i].activate("tilt", false);
 	      }
 	      else {
 		gui.elements[i].activate("tilt", true);
-	      }	  
-	      gui.elements[i].currentValue = normalizeValue(tiltLR, rangeLR.min, rangeLR.max); 
+	      }
+	      gui.elements[i].currentValue = normalizeValue(tiltLR, rangeLR.min, rangeLR.max);
 	    }
 	  }
 	}
       }
-      
+
       var el = document.getElementsByTagName("canvas")[0];
       var ctx = el.getContext("2d");
       gui.Tick(ctx);
-          
-    }    
-    
+
+    }
+
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
     // helpers
-    function normalizeValue(v, minInput, maxInput){	
+    function normalizeValue(v, minInput, maxInput){
       if(v < minInput) { v = minInput; }
       if(v > maxInput) { v = maxInput; }
-      
+
       var inputRange = maxInput - minInput;
-      
+
       v += -minInput;
       v *= 1.0 / inputRange;
-      
-      return v;	
+
+      return v;
     }
-  
+
 
   </script>
-  
+
 </body>
 
 </html>

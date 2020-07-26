@@ -1,6 +1,6 @@
-var app = require('express')()
-  , server = require('http').createServer(app)
-  , io = require('socket.io').listen(server);
+var expressApp = require('express')();
+var server = require('http').createServer(expressApp);
+var io = require('socket.io').listen(server);
 
 var osc = require('node-osc');
 
@@ -10,52 +10,90 @@ var client = new osc.Client('192.168.2.8', 57120);
 server.listen(8080);	// webserver on port 80
 
 // uncomment this to add status messages about connections
+setInterval(status, 1000);
 
-//setInterval(status, 1000);
+function setupDefaultApp(app) {
+  app.get('/', function (req, res) {
+    res.sendfile(__dirname + '/ui.html');
+  });
 
-app.get('/', function (req, res) {
-  res.sendfile(__dirname + '/ui.html');
-});
+  app.get('/base.css', function (req, res) {
+    res.sendfile(__dirname + '/skeleton/base.css');
+  });
 
-app.get('/base.css', function (req, res) {
-        res.sendfile(__dirname + '/skeleton/base.css');
-        });
-app.get('/skeleton.css', function (req, res) {
-        res.sendfile(__dirname + '/skeleton/skeleton.css');
-        });
-app.get('/layout.css', function (req, res) {
-        res.sendfile(__dirname + '/skeleton/layout.css');
-        });
+  app.get('/skeleton.css', function (req, res) {
+    res.sendfile(__dirname + '/skeleton/skeleton.css');
+  });
 
-app.get('/jquery-1.9.1.js', function (req, res) {
-  res.sendfile(__dirname + '/jquery-1.9.1.js');
-});
+  app.get('/layout.css', function (req, res) {
+    res.sendfile(__dirname + '/skeleton/layout.css');
+  });
 
-app.get('/interface.js', function (req, res) {
-  res.sendfile(__dirname + '/interface.js');
-});
+  app.get('/jquery-1.9.1.js', function (req, res) {
+    res.sendfile(__dirname + '/jquery-1.9.1.js');
+  });
 
-app.get('/setupUI.js', function (req, res) {
-  res.sendfile(__dirname + '/setupUI.js');
-});
+  app.get('/interface.js', function (req, res) {
+    res.sendfile(__dirname + '/interface.js');
+  });
 
-app.get('/buttonDefinitions.js', function (req, res) {
-  res.sendfile(__dirname + '/buttonDefinitions.js');
-});
+  app.get('/setupUI.js', function (req, res) {
+    res.sendfile(__dirname + '/setupUI.js');
+  });
 
-app.get('/Farbstreifen.png', function (req, res) {
-        res.sendfile(__dirname + '/resources/Farbstreifen.png');
-        });
-app.get('/Default-568h.png', function (req, res) {
-        res.sendfile(__dirname + '/resources/Default-568h.png');
+  app.get('/buttonDefinitions.js', function (req, res) {
+    res.sendfile(__dirname + '/buttonDefinitions.js');
+  });
 
-        });
-app.get('/ICON.png', function (req, res) {
-        res.sendfile(__dirname + '/resources/ICON.png');
+  app.get('/Farbstreifen.png', function (req, res) {
+    res.sendfile(__dirname + '/resources/Farbstreifen.png');
+  });
 
-        });
+  app.get('/Default-568h.png', function (req, res) {
+    res.sendfile(__dirname + '/resources/Default-568h.png');
+  });
 
+  app.get('/ICON.png', function (req, res) {
+    res.sendfile(__dirname + '/resources/ICON.png');
+  });
 
+//nore specific
+  app.get('/ask', function (req, res) {
+      for(i = 0; i < connectedSessions.length; i++){
+          console.log("availableClients" + availableClients[i]);
+          connectedSessions[i].emit('whoAreYou');
+      }
+  });
+
+  app.get('/intro', function (req, res) {
+      for(i = 0; i < connectedSessions.length; i++){
+        connectedSessions[i].emit('setText', 'During the performance of this piece you will receive instructions. Please follow them up in order to contribute  to the piece. Soon you will receive the first instruction ...');
+      }
+      res.sendfile(__dirname + '/done.html');
+  });
+
+  app.get('/screen_1', function (req, res) {
+    var items = ['Stand Up Now', 'Wave your phone in the air', 'Stand up and bow to your neighbour'];
+    for(i = 0; i < connectedSessions.length; i++){
+      var item = items[Math.floor(Math.random()*items.length)];
+      connectedSessions[i].emit('setText', item);
+    }
+    res.sendfile(__dirname + '/done.html');
+  });
+
+  app.get('/showSplash', function (req, res) {
+    for(i = 0; i < connectedSessions.length; i++){
+      connectedSessions[i].emit('showSplash');
+    }
+    res.sendfile(__dirname + '/done.html');
+  });
+
+  app.get('/status', function (req, res) {
+    status();
+  });
+}
+
+setupDefaultApp(expressApp);
 
 // this session managment code is for future features that will be included in RC1
 var connectedSessions = [];	// array of every connection
@@ -105,25 +143,25 @@ io.sockets.on('connection', function (socket) {
     if(data.type == "server"){
       // make a new rtc server object
       // push it onto the stack of availableServers
-	var oscServer = new Object();
-	oscServer.id = socket.id;
-	oscServer.location = data.location;
-	oscServer.socket = socket;
+      var oscServer = new Object();
+      oscServer.id = socket.id;
+      oscServer.location = data.location;
+      oscServer.socket = socket;
 
       // check to see if this is a server renaming itself
       var bIsNewServer = true;
       for(i = 0; i < availableServers.length; i++){
-	if(oscServer.id === availableServers[i].id){
-	  // just rename existing server
-	  availableServers[i].location = oscServer.location;
-	  bIsNewServer = false;
-	  console.log("renaming existing server");
-	}
+        if(oscServer.id === availableServers[i].id){
+	         // just rename existing server
+           availableServers[i].location = oscServer.location;
+           bIsNewServer = false;
+           console.log("renaming existing server");
+         }
       }
 
       if(bIsNewServer){
-	console.log("adding new server to the list!");
-	availableServers.push(oscServer);
+        console.log("adding new server to the list!");
+        availableServers.push(oscServer);
       }
     }	// end of if = server
 
@@ -136,38 +174,32 @@ io.sockets.on('connection', function (socket) {
 
       var bIsNewClient = true;
       for(i = 0; i < availableClients.length; i++){
-	if(oscClient.id === availableClients[i].id){
-	  // just rename existing server
-	  availableClients[i].location = oscClient.location;
-	  bIsNewClient = false;
-	  console.log("renaming existing client");
-	}
+        if(oscClient.id === availableClients[i].id){
+          // just rename existing server
+          availableClients[i].location = oscClient.location;
+          bIsNewClient = false;
+          console.log("renaming existing client");
+        }
       }
 
       if(bIsNewClient){
-	console.log("Adding new client to the list!");
-	availableClients.push(oscClient);
+        console.log("Adding new client to the list!");
+        availableClients.push(oscClient);
       }
-
     }
   });
 
   socket.on("sendOSC", function(data){
     // console.log(data);
     if(data.v != null){
-
       var msg =  new osc.Message(data.destinationAddress);
       msg.append(data.v);
-
       for(var i = 0; i < msg.args.length; ++i){
-	msg.args[i].type = 'float';
+        msg.args[i].type = 'float';
       }
-
       console.log(msg);
-
       client.send(msg);
-    }
-    else {
+    } else {
       console.log("GOT NULL");
     }
   });
@@ -179,7 +211,6 @@ io.sockets.on('connection', function (socket) {
 
   socket.on("listServers", function(data){
     var responseClient = clientOrServer(socket);
-
     var serverList = [];
     for(i = 0; i < availableServers.length; i++){
       serverList[i] = availableServers[i].location;
@@ -203,68 +234,7 @@ function status(){
   for(i = 0; i < availableClients.length; i++){
     console.log("Client - ID: "+availableClients[i].id+" location: "+availableClients[i].location);
   }
-
 }
-
-app.get('/ask', function (req, res) {
-    for(i = 0; i < connectedSessions.length; i++){
-        console.log("availableClients" + availableClients[i]);
-        connectedSessions[i].emit('whoAreYou');
-    }
-});
-
-app.get('/intro', function (req, res) {
-
-    for(i = 0; i < connectedSessions.length; i++){
-        connectedSessions[i].emit('setText', 'During the performance of this piece you will receive instructions. Please follow them up in order to contribute  to the piece. Soon you will receive the first instruction ...');
-    }
-    res.sendfile(__dirname + '/done.html');
-
-});
-
-app.get('/screen_1', function (req, res) {
-        var items = ['Stand Up Now', 'Wave your phone in the air', 'Stand up and bow to your neighbour'];
-    for(i = 0; i < connectedSessions.length; i++){
-        var item = items[Math.floor(Math.random()*items.length)];
-
-        connectedSessions[i].emit('setText', item);
-        
-    }
-    res.sendfile(__dirname + '/done.html');
-        
-});
-
-app.get('/screen_2', function (req, res) {
-        console.log(req);
-        for(i = 0; i < connectedSessions.length; i++){
-        connectedSessions[i].emit('setTextWithButton', 'Choose the right moment to inject the sound of a Breeze / the sound of foot steps');
-        
-        }
-        res.sendfile(__dirname + '/done.html');
-        
-        });
-
-app.get('/screen_3', function (req, res) {
-        console.log(req);
-        for(i = 0; i < connectedSessions.length; i++){
-        connectedSessions[i].emit('setTextWithButton', 'Please push the button to welcome poet Hans Vaders');
-        
-        }
-        res.sendfile(__dirname + '/done.html');
-        
-        });
-
-app.get('/showSplash', function (req, res) {
-        for(i = 0; i < connectedSessions.length; i++){
-        connectedSessions[i].emit('showSplash');        
-        }
-        res.sendfile(__dirname + '/done.html');
-
-        });
-
-app.get('/status', function (req, res) {
-        status();
-        });
 
 /////////////////// helpers
 
@@ -276,15 +246,15 @@ function clientOrServer(testSocket){
 
   for(i = 0; i < availableServers.length; i++){
       if(testSocket.id === availableServers[i].id){
-	returnObject.type = "server";
-	returnObject.index = i;
+        returnObject.type = "server";
+        returnObject.index = i;
       }
   }
 
   for(i = 0; i < availableClients.length; i++){
       if(testSocket.id === availableClients[i].id){
-	returnObject.type = "client";
-	returnObject.index = i;
+        returnObject.type = "client";
+        returnObject.index = i;
       }
   }
   return returnObject;
